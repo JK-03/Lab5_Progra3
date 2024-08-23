@@ -387,17 +387,7 @@ void cframe::on_pushButton_7_clicked()
         }
     }
 
-    int **matrizRotada = new int*[n];
-    for (int i = 0; i < n; ++i) {
-        matrizRotada[i] = new int[n];
-    }
-
-    for (int i = 0; i < n; ++i) {
-        for (int j = 0; j < n; ++j) {
-            matrizRotada[j][n - 1 - i] = matrizOriginal[i][j];
-        }
-    }
-
+    // Mostrar matriz en tableWidget_8
     ui->tableWidget_8->setRowCount(n);
     ui->tableWidget_8->setColumnCount(n);
     for (int i = 0; i < n; ++i) {
@@ -406,18 +396,107 @@ void cframe::on_pushButton_7_clicked()
         }
     }
 
-    ui->tableWidget_9->setRowCount(n);
-    ui->tableWidget_9->setColumnCount(n);
+    // Liberar memoria
     for (int i = 0; i < n; ++i) {
-        for (int j = 0; j < n; ++j) {
+        delete[] matrizOriginal[i];
+    }
+    delete[] matrizOriginal;
+}
+
+void cframe::on_pushButton_8_clicked()
+{
+    int filas = ui->tableWidget_8->rowCount(); // Tamaño de la matriz original
+    int columnas = ui->tableWidget_8->columnCount();
+
+    if (filas == 0 || columnas == 0) {
+        QMessageBox::warning(this, "Error", "No hay datos en la matriz para rotar.");
+        return;
+    }
+
+    // Leer la matriz actual de tableWidget_8
+    int **matrizOriginal = new int*[filas];
+    for (int i = 0; i < filas; ++i) {
+        matrizOriginal[i] = new int[columnas];
+    }
+
+    for (int i = 0; i < filas; ++i) {
+        for (int j = 0; j < columnas; ++j) {
+            matrizOriginal[i][j] = ui->tableWidget_8->item(i, j)->text().toInt();
+        }
+    }
+
+    // Leer la matriz actual rotada de tableWidget_9 si hay datos
+    int **matrizActual = nullptr;
+    int filasActual = 0;
+    int columnasActual = 0;
+
+    if (ui->tableWidget_9->rowCount() > 0 && ui->tableWidget_9->columnCount() > 0) {
+        filasActual = ui->tableWidget_9->rowCount();
+        columnasActual = ui->tableWidget_9->columnCount();
+
+        matrizActual = new int*[filasActual];
+        for (int i = 0; i < filasActual; ++i) {
+            matrizActual[i] = new int[columnasActual];
+        }
+
+        for (int i = 0; i < filasActual; ++i) {
+            for (int j = 0; j < columnasActual; ++j) {
+                matrizActual[i][j] = ui->tableWidget_9->item(i, j)->text().toInt();
+            }
+        }
+    } else {
+        // Si no hay datos en tableWidget_9, usar matrizOriginal como base
+        matrizActual = new int*[filas];
+        for (int i = 0; i < filas; ++i) {
+            matrizActual[i] = new int[columnas];
+        }
+
+        for (int i = 0; i < filas; ++i) {
+            for (int j = 0; j < columnas; ++j) {
+                matrizActual[i][j] = matrizOriginal[i][j];
+            }
+        }
+
+        filasActual = filas;
+        columnasActual = columnas;
+    }
+
+    // Preparar la matriz rotada
+    int **matrizRotada = new int*[columnasActual];
+    for (int i = 0; i < columnasActual; ++i) {
+        matrizRotada[i] = new int[filasActual];
+    }
+
+    // Rotar la matriz en sentido horario
+    for (int i = 0; i < filasActual; ++i) {
+        for (int j = 0; j < columnasActual; ++j) {
+            matrizRotada[j][filasActual - 1 - i] = matrizActual[i][j];
+        }
+    }
+
+    // Actualizar tableWidget_9 con la matriz rotada
+    ui->tableWidget_9->setRowCount(columnasActual);
+    ui->tableWidget_9->setColumnCount(filasActual);
+
+    for (int i = 0; i < columnasActual; ++i) {
+        for (int j = 0; j < filasActual; ++j) {
             ui->tableWidget_9->setItem(i, j, new QTableWidgetItem(QString::number(matrizRotada[i][j])));
         }
     }
 
-    for (int i = 0; i < n; ++i) {
+    // Liberar memoria
+    for (int i = 0; i < filas; ++i) {
         delete[] matrizOriginal[i];
-        delete[] matrizRotada[i];
     }
     delete[] matrizOriginal;
+
+    for (int i = 0; i < filasActual; ++i) {
+        delete[] matrizActual[i];
+    }
+    delete[] matrizActual;
+
+    for (int i = 0; i < columnasActual; ++i) {
+        delete[] matrizRotada[i];
+    }
     delete[] matrizRotada;
 }
